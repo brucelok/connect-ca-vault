@@ -1,0 +1,50 @@
+services:
+  vault:
+    image: hashicorp/vault:1.11.2
+    container_name: vault
+    ports:
+      - 8200:8200
+    networks:
+      loco:
+        ipv4_address: 10.0.0.2
+
+  consul-dc1:
+    image: hashicorp/consul:1.15.2
+    container_name: consul-dc1
+    ports:
+      - 8500:8500
+    volumes:
+      - ./consul/server.hcl:/etc/consul.d/server.hcl
+    entrypoint:
+      [
+        "consul",
+        "agent",
+        "-config-file",
+        "/etc/consul.d/server.hcl"
+      ]
+    networks:
+      loco:
+        ipv4_address: 10.0.0.3
+
+  consul-dc2:
+    image: hashicorp/consul:1.15.2
+    container_name: consul-dc2
+    volumes:
+      - ./consul-dc2/server.hcl:/etc/consul.d/server.hcl
+    entrypoint:
+      [
+        "consul",
+        "agent",
+        "-config-file",
+        "/etc/consul.d/server.hcl"
+      ]
+    networks:
+      loco:
+        ipv4_address: 10.0.0.4
+
+networks:
+  loco:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.0.0.0/24
